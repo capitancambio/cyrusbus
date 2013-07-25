@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
+import threading
 
 class Bus(object):
 
@@ -54,7 +55,15 @@ class Bus(object):
             return self
 
         for subscriber in self.subscriptions[key]:
-            subscriber['callback'](self, *args, **kwargs)
+            AnonymousThread(lambda:subscriber['callback'](self, *args, **kwargs)).start()
 
     def reset(self):
         self.subscriptions = {}
+
+class AnonymousThread(threading.Thread):
+	"""AnonymousThread"""
+	def __init__(self, function):
+		super(AnonymousThread, self).__init__()
+		self.function= function
+	def run(self):
+		self.function()
