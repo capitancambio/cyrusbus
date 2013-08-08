@@ -55,10 +55,15 @@ class Bus(object):
             return self
 
         for subscriber in self.subscriptions[key]:
-            AnonymousThread(lambda:subscriber['callback'](self, *args, **kwargs)).start()
+            #func binds the closure args, otherwise they change
+            #before the thread is actually launched
+            bind(subscriber['callback'],self,*args,**kwargs)
 
     def reset(self):
         self.subscriptions = {}
+
+def bind(sus,bus,*args,**kwargs):
+        AnonymousThread(lambda:sus(bus, *args, **kwargs)).start()
 
 class AnonymousThread(threading.Thread):
 	"""AnonymousThread"""
